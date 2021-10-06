@@ -4,12 +4,13 @@ pragma solidity >=0.5.16 <0.9.0;
 contract SupplyChain {
 
   // <owner>
-  string public owner;
+  address public owner;
 
   // <skuCount>
   uint public skuCount;
 
   // <items mapping>
+  // mapping(uint => )
 
   // <enum State: ForSale, Sold, Shipped, Received>
   enum State { ForSale, Sold, Shipped, Received }
@@ -30,12 +31,16 @@ contract SupplyChain {
    */
 
   // <LogForSale event: sku arg>
+  event LogForSale(uint indexed _sku);
 
   // <LogSold event: sku arg>
+  event LogSold(uint indexed _sku);
 
   // <LogShipped event: sku arg>
+  event LogShipped(uint indexed _sku);
 
   // <LogReceived event: sku arg>
+  event LogReceived(uint indexed _sku);
 
 
   /*
@@ -45,6 +50,10 @@ contract SupplyChain {
   // Create a modifer, `isOwner` that checks if the msg.sender is the owner of the contract
 
   // <modifier: isOwner
+  modifier isOwner {
+    require(msg.sender == owner);
+    _;
+  }
 
   modifier verifyCaller (address _address) {
     // require (msg.sender == _address);
@@ -73,6 +82,11 @@ contract SupplyChain {
   // an Item has been added?
 
   // modifier forSale
+  modifier forSale (Item memory _item) {
+    require(_item.State != 0 && _item.State == State.ForSale);
+    _;
+  }
+
   // modifier sold(uint _sku)
   // modifier shipped(uint _sku)
   // modifier received(uint _sku)
@@ -80,6 +94,8 @@ contract SupplyChain {
   constructor() public {
     // 1. Set the owner to the transaction sender
     // 2. Initialize the sku count to 0. Question, is this necessary?
+    owner = msg.sender;
+    skuCount = 0;
   }
 
   function addItem(string memory _name, uint _price) public returns (bool) {
@@ -87,6 +103,23 @@ contract SupplyChain {
     // 2. Increment the skuCount by one
     // 3. Emit the appropriate event
     // 4. return true
+
+    Item[] storage items;
+
+    items[skuCount] = Item({
+      name: _name,
+      sku: skuCount,
+      price: _price,
+      state: State.ForSale,
+      seller: msg.sender,
+      buyer: address(0)
+    });
+
+    skuCount = skuCount + 1;
+
+    emit LogForSale(skuCount);
+
+    return true;
 
     // hint:
     // items[skuCount] = Item({
