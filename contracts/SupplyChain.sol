@@ -56,12 +56,12 @@ contract SupplyChain {
   }
 
   modifier verifyCaller (address _address) {
-    // require (msg.sender == _address);
+    require (msg.sender == _address);
     _;
   }
 
   modifier paidEnough(uint _price) {
-    // require(msg.value >= _price);
+    require(msg.value >= _price);
     _;
   }
 
@@ -83,11 +83,15 @@ contract SupplyChain {
 
   // modifier forSale
   modifier forSale (Item memory _item) {
-    require(_item.State != 0 && _item.State == State.ForSale);
+    require(_item.sku != 0 && _item.state == State.ForSale);
     _;
   }
 
   // modifier sold(uint _sku)
+  modifier sold(uint _sku) {
+    require(_sku!=0);
+    _;
+  }
   // modifier shipped(uint _sku)
   // modifier received(uint _sku)
 
@@ -104,9 +108,11 @@ contract SupplyChain {
     // 3. Emit the appropriate event
     // 4. return true
 
-    Item[] storage items;
+    // Item[] memory items;
 
-    items[skuCount] = Item({
+    // items[skuCount]
+    Item memory item;
+    item = Item({
       name: _name,
       sku: skuCount,
       price: _price,
@@ -114,6 +120,9 @@ contract SupplyChain {
       seller: msg.sender,
       buyer: address(0)
     });
+
+    // Item[] memory itemArray;
+    // itemArray[skuCount] = item;
 
     skuCount = skuCount + 1;
 
@@ -164,15 +173,15 @@ contract SupplyChain {
   function receiveItem(uint sku) public {}
 
   // Uncomment the following code block. it is needed to run tests
-  /* function fetchItem(uint _sku) public view */
-  /*   returns (string memory name, uint sku, uint price, uint state, address seller, address buyer) */
-  /* { */
-  /*   name = items[_sku].name; */
-  /*   sku = items[_sku].sku; */
-  /*   price = items[_sku].price; */
-  /*   state = uint(items[_sku].state); */
-  /*   seller = items[_sku].seller; */
-  /*   buyer = items[_sku].buyer; */
-  /*   return (name, sku, price, state, seller, buyer); */
-  /* } */
+  // function fetchItem(uint _sku) public view
+  //    returns (string memory name, uint sku, uint price, uint state, address seller, address buyer)
+  //  {
+  //    name = items[_sku].name;
+  //    sku = items[_sku].sku;
+  //    price = items[_sku].price;
+  //    state = uint(items[_sku].state);
+  //    seller = items[_sku].seller;
+  //    buyer = items[_sku].buyer;
+  //    return (name, sku, price, state, seller, buyer);
+  //  }
 }
