@@ -68,9 +68,9 @@ contract SupplyChain {
   modifier checkValue(uint _sku) {
     //refund them after pay for item (why it is before, _ checks for logic before func)
     _;
-    // uint _price = items[_sku].price;
-    // uint amountToRefund = msg.value - _price;
-    // items[_sku].buyer.transfer(amountToRefund);
+    uint _price = items[_sku].price;
+    uint amountToRefund = msg.value - _price;
+    items[_sku].buyer.transfer(amountToRefund);
   }
 
   // For each of the following modifiers, use what you learned about modifiers
@@ -89,7 +89,7 @@ contract SupplyChain {
 
   // modifier sold(uint _sku)
   modifier sold(uint _sku) {
-    require(_sku!=0);
+    require(_sku != 0);
     _;
   }
   // modifier shipped(uint _sku)
@@ -116,7 +116,7 @@ contract SupplyChain {
       seller: msg.sender,
       buyer: address(0)
     });
-    skuCount = skuCount + 1;
+    skuCount += 1;
     emit LogForSale(skuCount);
     return true;
 
@@ -146,23 +146,46 @@ contract SupplyChain {
   //    - check the value after the function is called to make
   //      sure the buyer is refunded any excess ether sent.
   // 6. call the event associated with this function!
-  function buyItem(uint sku) public payable {
-
-  }
+  function buyItem(uint sku) public payable
+    forSale(items[sku])
+    paidEnough(items[sku].price)
+    checkValue(sku)
+      {
+        Item currentItem = items[sku];
+        bool sendValue = currentItem.seller.send(msg.value);
+        require(sendValue, "Failed to send!");
+        currentItem.buyer = msg.sender;
+        currentItem.state = State.Sold;
+        emit LogSold(sku);
+      }
 
   // 1. Add modifiers to check:
   //    - the item is sold already
   //    - the person calling this function is the seller.
   // 2. Change the state of the item to shipped.
   // 3. call the event associated with this function!
-  function shipItem(uint sku) public {}
+  function shipItem(uint sku) public
+    sold(sku)
+    verifyCaller(items[sku].seller)
+      {
+        Item currentItem = items[sku];
+        currentItem.state = State.Shipped;
+        emit LogShipped(sku);
+      }
 
   // 1. Add modifiers to check
   //    - the item is shipped already
   //    - the person calling this function is the buyer.
   // 2. Change the state of the item to received.
   // 3. Call the event associated with this function!
-  function receiveItem(uint sku) public {}
+  function receiveItem(uint sku) public
+    sold(sku)
+    verifyCaller(items[sku].buyer)
+      {
+        Item currentItem = items[sku];
+        currentItem.state = State.Received;
+        emit LogReceived(sku);
+      }
 
   // Uncomment the following code block. it is needed to run tests
   // function fetchItem(uint _sku) public view
