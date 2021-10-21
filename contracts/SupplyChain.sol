@@ -116,7 +116,6 @@ contract SupplyChain {
     // 2. Increment the skuCount by one
     // 3. Emit the appropriate event
     // 4. return true
-
     items[skuCount] = Item({
       name: _name,
       sku: skuCount,
@@ -145,13 +144,13 @@ contract SupplyChain {
     forSale(sku)
     paidEnough(items[sku].price)
     checkValue(sku)
-  {
+   {
     bool sendValue = items[sku].seller.send(items[sku].price);
     require(sendValue, "Failed to send!");
     items[sku].buyer = msg.sender;
     items[sku].state = State.Sold;
     emit LogSold(sku);
-  }
+   }
 
   // 1. Add modifiers to check:
   //    - the item is sold already
@@ -161,10 +160,10 @@ contract SupplyChain {
   function shipItem(uint sku) public
     sold(sku)
     verifyCaller(items[sku].seller)
-  {
+   {
     items[sku].state = State.Shipped;
     emit LogShipped(sku);
-  }
+   }
 
   // 1. Add modifiers to check
   //    - the item is shipped already
@@ -174,10 +173,10 @@ contract SupplyChain {
   function receiveItem(uint sku) public
     shipped(sku)
     verifyCaller(items[sku].buyer)
-  {
+   {
     items[sku].state = State.Received;
     emit LogReceived(sku);
-  }
+   }
 
   // Uncomment the following code block. it is needed to run tests
   function fetchItem(uint _sku) public view
