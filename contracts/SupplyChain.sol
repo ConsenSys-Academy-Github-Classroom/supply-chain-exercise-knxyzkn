@@ -42,33 +42,24 @@ contract SupplyChain {
   // <LogReceived event: sku arg>
   event LogReceived(uint indexed _sku);
 
-  event LogItemName(string _name);
-  event LogItemSKU(uint _sku);
-  event LogItemPrice(uint _price);
-  event LogItemState(State _state);
-  event LogItemSeller(address _seller);
-  event LogItemBuyer(address _buyer);
-
-
   /*
    * Modifiers
    */
 
   // Create a modifer, `isOwner` that checks if the msg.sender is the owner of the contract
-
   // <modifier: isOwner
   modifier isOwner {
-    require(msg.sender == owner);
+    require(msg.sender == owner, "Owner is not the message sender!");
     _;
   }
 
   modifier verifyCaller (address _address) {
-    require (msg.sender == _address);
+    require (msg.sender == _address, "Transaction caller is not the right caller!");
     _;
   }
 
   modifier paidEnough(uint _price) {
-    require(msg.value >= _price);
+    require(msg.value >= _price, "Price is not enough!");
     _;
   }
 
@@ -91,7 +82,7 @@ contract SupplyChain {
   // modifier forSale
   modifier forSale (uint _sku) {
     require(items[_sku].state == State.ForSale, "State is not ForSale!");
-    require(items[_sku].buyer == address(0));
+    require(items[_sku].seller != address(0), "Seller address is 0x00");
     _;
   }
 
@@ -134,12 +125,6 @@ contract SupplyChain {
       seller: msg.sender,
       buyer: address(0)
     });
-    // emit LogItemName(items[skuCount].name);
-    // emit LogItemSKU(skuCount);
-    // emit LogItemPrice(items[skuCount].price);
-    // emit LogItemState(items[skuCount].state);
-    // emit LogItemSeller(items[skuCount].seller);
-    // emit LogItemBuyer(items[skuCount].buyer);
     emit LogForSale(skuCount);
     skuCount = skuCount + 1;
     return true;
@@ -165,14 +150,6 @@ contract SupplyChain {
     require(sendValue, "Failed to send!");
     items[sku].buyer = msg.sender;
     items[sku].state = State.Sold;
-    // emit LogItemName(currentItem.name);
-    // emit LogItemName(items[sku].name);
-    // emit LogItemSKU(sku);
-    // emit LogItemPrice(items[sku].price);
-    // emit LogItemState(items[sku].state);
-    // emit LogItemSeller(items[sku].seller);
-    // emit LogItemBuyer(items[sku].buyer);
-
     emit LogSold(sku);
   }
 
